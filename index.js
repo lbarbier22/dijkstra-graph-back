@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const graphRouter = require('./routes/graph.route')
+const dijkstraRouter = require('./routes/dijkstra.route')
 
 const app = express()
 const PORT = 3000
@@ -20,6 +21,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 
 app.use('/api/graph', graphRouter)
+app.use('/api/dijkstra', dijkstraRouter)
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
