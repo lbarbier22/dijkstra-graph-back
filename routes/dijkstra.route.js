@@ -8,14 +8,14 @@ const graphPath = path.join(__dirname, '../data/graph.json');
 const geojson = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
 
 router.post('/', (req, res) => {
-    const { start, end } = req.body;
+    const { start, end, step} = req.body;
 
     if (!start || !end) {
         return res.status(400).json({ error: 'Start and end nodes required' });
     }
 
     const graph = buildGraph(geojson);
-    const result = dijkstraCalculation(graph,start, end);
+    const result = dijkstraCalculation(graph, start, end, step);
     if (!result) {
         return res.status(404).json({ error: 'No path found' });
     }
