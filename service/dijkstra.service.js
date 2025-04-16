@@ -1,9 +1,35 @@
-function dijkstraCalculation(graph, start, end) {
+function dijkstraCalculation(graph, start, end, step) {
 
   const weight = {};
   const previous = {};
   const visited = new Set();
   const nodes = new Set(Object.keys(graph));
+
+  // On regarde s'il y a des steps
+  if (step && step.length > 0) {
+    const fullPath = [];
+    let totalWeight = 0;
+    let currentStart = start;
+
+    // On itère sur chaque step et le point d'arrivée
+    for (const stop of [...step, end]) {
+      // On calcule le chemin entre le point de départ et le step
+      const segment = dijkstraCalculation(graph, currentStart, stop);
+
+      if (!segment.path.length) return { path: [], weight: null };
+
+      // On enlève le premier élément du segment qu'on vient de calculer pour éviter le doublon, seulement si le fullPath n'est pas vide
+      if (fullPath.length > 0) segment.path.shift();
+      fullPath.push(...segment.path);
+      totalWeight += segment.weight;
+      currentStart = stop;
+    }
+
+    return {
+      path: fullPath,
+      weight: Number(totalWeight.toFixed(2))
+    };
+  }
 
   //On définit toutes les poids à Infinity pour les écraser à la première itération sur le node.
   for (const node of nodes) {
