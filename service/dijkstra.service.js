@@ -49,7 +49,7 @@ function dijkstraCalculation(graph, start, end) {
 
   return {
     path,
-    weight: weight[end] !== Infinity ? weight[end] : null
+    weight: weight[end] !== Infinity ? Number(weight[end].toFixed(2)) : null
   };
 }
 
