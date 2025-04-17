@@ -1,7 +1,7 @@
-const express = require('express')
-const cors = require('cors')
-const graphRouter = require('./routes/graph.route')
-const dijkstraRouter = require('./routes/dijkstra.route')
+import express from 'express'
+import cors from 'cors'
+import graphRouter from './routes/graph.route.js'
+import dijkstraRouter from './routes/dijkstra.route.js'
 
 const app = express()
 const PORT = 3000

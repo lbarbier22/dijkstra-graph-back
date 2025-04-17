@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express'
+import { buildGraph, getLastGeneratedGraph } from '../service/graph.service.js';
+import { dijkstraCalculation } from '../service/dijkstra.service.js';
+
 const router = express.Router();
-const { buildGraph, getLastGeneratedGraph } = require('../service/graph.service');
-const { dijkstraCalculation } = require('../service/dijkstra.service');
 
 router.post('/', (req, res) => {
     const { start, end, step} = req.body;
@@ -18,4 +19,4 @@ router.post('/', (req, res) => {
     res.status(200).json(result);
 });
 
-module.exports = router
+export default router
