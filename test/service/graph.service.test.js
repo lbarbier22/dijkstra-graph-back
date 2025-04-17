@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { generateRandomGraph, buildGraph, getLastGeneratedGraph } from '../../service/graph.service.js'
+import { generateRandomGraph, buildGraph, getLastGeneratedGraph, normalizeGeoJsonFromLinesOnly } from '../../service/graph.service.js'
 
 describe('Graph Service', () => {
     beforeEach(() => {
@@ -89,6 +89,68 @@ describe('Graph Service', () => {
             const result = getLastGeneratedGraph()
             expect(result).toEqual(second)
             expect(result.features.length).toBeGreaterThan(first.features.length)
+        })
+    })
+
+    describe('normalizeGeoJsonFromLinesOnly', () => {
+        it('crée des points et lignes à partir de LineStrings', () => {
+            const geojsonInput = {
+                type: 'FeatureCollection',
+                features: [
+                    {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: [[1, 2], [3, 4]]
+                        }
+                    }
+                ]
+            }
+
+            const result = normalizeGeoJsonFromLinesOnly(geojsonInput)
+            expect(result).toBeDefined()
+            expect(result.type).toBe('FeatureCollection')
+
+            const points = result.features.filter(f => f.geometry.type === 'Point')
+            const lines = result.features.filter(f => f.geometry.type === 'LineString')
+
+            expect(points.length).toBe(2)
+            expect(lines.length).toBe(1)
+
+            points.forEach(p => {
+                expect(p.properties.id).toMatch(/^[A-Z0-9]+$/)
+                expect(p.geometry.coordinates).toHaveLength(2)
+            })
+
+            const line = lines[0]
+            expect(line.properties.source).toBeDefined()
+            expect(line.properties.target).toBeDefined()
+            expect(typeof line.properties.weight).toBe('number')
+            expect(line.geometry.coordinates.length).toBe(2)
+        })
+
+        it('ignore les features non-LineString', () => {
+            const geojsonInput = {
+                type: 'FeatureCollection',
+                features: [
+                    {
+                        type: 'Feature',
+                        properties: { id: 'X' },
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [0, 0]
+                        }
+                    }
+                ]
+            }
+
+            const result = normalizeGeoJsonFromLinesOnly(geojsonInput)
+            const points = result.features.filter(f => f.geometry.type === 'Point')
+            const lines = result.features.filter(f => f.geometry.type === 'LineString')
+
+            expect(points.length).toBe(0)
+            expect(lines.length).toBe(0)
         })
     })
 })
