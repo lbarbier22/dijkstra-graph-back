@@ -43,7 +43,7 @@ describe('POST /api/dijkstra', () => {
 
     it('retourne 200 avec les résultats du plus court chemin', async () => {
         const mockGraph = { nodes: ['A', 'B'], edges: [['A', 'B']] }
-        const mockResult = { path: ['A', 'B'], weight: 10 }
+        const mockResult = { path: ['A', 'B'], time: 0, weight: 10 }
 
         vi.spyOn(graphService, 'getLastGeneratedGraph').mockReturnValue(mockGraph)
         vi.spyOn(graphService, 'buildGraph').mockReturnValue(mockGraph)
