@@ -1,9 +1,80 @@
-import initGraphData from '../data/graph.json' with { type: "json" };
+let lastGeneratedGraph = null;
+const initGeneratedGraph = generateRandomGraph(30);
 
-let lastGeneratedGraph = initGraphData;
 
-// based on the structure of this article : https://www.datacamp.com/fr/tutorial/dijkstra-algorithm-in-python?dc_referrer=https%3A%2F%2Fwww.google.com%2F
-// Used to process with the Dijkstra algorithm
+function normalizeGeoJsonFromLinesOnly(inputGeoJson) {
+    const coordToId = new Map()
+    const pointFeatures = []
+    const edgeFeatures = []
+
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    let counter = 0
+
+    // Associer chaque coordonnée à un ID
+    const assignId = (coord) => {
+        const key = coord.join(',')
+        if (coordToId.has(key)) return coordToId.get(key)
+
+        const letter = letters[counter % letters.length]
+        const suffix = counter >= letters.length ? Math.floor(counter / letters.length) : ''
+        const id = `${letter}${suffix}`
+
+        coordToId.set(key, id)
+        pointFeatures.push({
+            type: 'Feature',
+            properties: { id },
+            geometry: {
+                type: 'Point',
+                coordinates: coord
+            }
+        })
+        counter++
+        return id
+    }
+
+    // Pour chaque LineString : récupérer les deux coords, créer les points + arêtes enrichies
+    for (const feature of inputGeoJson.features) {
+        if (feature.geometry.type !== 'LineString') continue
+
+        const [coordA, coordB] = feature.geometry.coordinates
+
+        // On multiplie par 80 pour avoir des coordonnées plus grandes (pour cytoscape)
+        coordA[0] *= 80
+        coordA[1] *= -80
+
+        coordB[0] *= 80
+        coordB[1] *= -80
+
+        const idA = assignId(coordA)
+        const idB = assignId(coordB)
+
+        const dx = coordA[0] - coordB[0]
+        const dy = coordA[1] - coordB[1]
+        const weight = Number(Math.sqrt(dx * dx + dy * dy).toFixed(2))
+
+        edgeFeatures.push({
+            type: 'Feature',
+            properties: {
+                source: idA,
+                target: idB,
+                weight
+            },
+            geometry: {
+                type: 'LineString',
+                coordinates: [coordA, coordB]
+            }
+        })
+    }
+
+    lastGeneratedGraph = {
+        type: 'FeatureCollection',
+            features: [...pointFeatures, ...edgeFeatures]
+    }
+    return lastGeneratedGraph;
+}
+
+// Basé sur la structure de cet article : https://www.datacamp.com/fr/tutorial/dijkstra-algorithm-in-python?dc_referrer=https%3A%2F%2Fwww.google.com%2F
+// Utilisé pour le process de l'algorithme Dijkstra
 function buildGraph(geojson) {
     const graph = {};
 
@@ -35,8 +106,8 @@ function generateRandomGraph(numPoints) {
         const suffix = i >= letters.length ? Math.floor(i / letters.length) : '';
         const id = letter + suffix;
 
-        const x = Number((Math.random() * 209).toFixed(2));
-        const y = Number((Math.random() * 209).toFixed(2));
+        const x = Number((Math.random() * 1000).toFixed(2));
+        const y = Number((Math.random() * 1000).toFixed(2));
 
         nodes.push({
             id,
@@ -118,7 +189,8 @@ function generateRandomGraph(numPoints) {
     lastGeneratedGraph = {
         type: 'FeatureCollection',
         features
-    };
+    }
+
     return lastGeneratedGraph;
 }
 
@@ -129,5 +201,6 @@ function getLastGeneratedGraph() {
 export {
     generateRandomGraph,
     buildGraph,
-    getLastGeneratedGraph
+    getLastGeneratedGraph,
+    normalizeGeoJsonFromLinesOnly
 }

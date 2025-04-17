@@ -1,5 +1,5 @@
 import express from 'express'
-import { generateRandomGraph, getLastGeneratedGraph } from "../service/graph.service.js";
+import {generateRandomGraph, getLastGeneratedGraph, normalizeGeoJsonFromLinesOnly} from "../service/graph.service.js";
 
 const router = express.Router();
 
@@ -23,5 +23,16 @@ router.get('/random', (req, res) => {
     const currentGraph = generateRandomGraph(numberOfNodes)
     res.status(200).json(currentGraph)
 })
+
+router.post('/generate', (req, res) => {
+    const { geoJson } = req.body;
+
+    if (!geoJson) {
+        return res.status(400).json({ error: 'geoJson required' });
+    }
+
+    const currentGenerateGraph = normalizeGeoJsonFromLinesOnly(geoJson);
+    res.status(200).json(currentGenerateGraph);
+});
 
 export default router

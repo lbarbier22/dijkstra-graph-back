@@ -13,6 +13,36 @@ describe('Graph API', () => {
         vi.clearAllMocks()
     })
 
+    it('POST /api/graph/generate - retourne une erreur 400 si geoJson est manquant', async () => {
+        const res = await request(app).post('/api/graph/generate').send({})
+        expect(res.status).toBe(400)
+        expect(res.body.error).toBe('geoJson required')
+    })
+
+    it('POST /api/graph/generate - retourne un graphe généré à partir de geoJson', async () => {
+        const inputGeoJson = {
+            type: "FeatureCollection",
+            features: [
+                {
+                    type: "Feature",
+                    properties: {},
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [
+                            [0, 0],
+                            [1, 1]
+                        ]
+                    }
+                }
+            ]
+        }
+
+        const res = await request(app).post('/api/graph/generate').send({ geoJson: inputGeoJson })
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveProperty('type', 'FeatureCollection')
+        expect(res.body.features.length).toBeGreaterThan(0)
+    })
+
     it('GET /api/graph - retourne le graphe sauvegardé', async () => {
         vi.spyOn(graphService, 'getLastGeneratedGraph').mockReturnValue({ nodes: ['A'], edges: [] })
 
