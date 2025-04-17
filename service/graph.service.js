@@ -1,4 +1,4 @@
-const initGraphData = require('../data/graph.json')
+import initGraphData from '../data/graph.json' with { type: "json" };
 
 let lastGeneratedGraph = initGraphData;
 
@@ -35,8 +35,8 @@ function generateRandomGraph(numPoints) {
         const suffix = i >= letters.length ? Math.floor(i / letters.length) : '';
         const id = letter + suffix;
 
-        const x = Number((Math.random() * 99).toFixed(2));
-        const y = Number((Math.random() * 99).toFixed(2));
+        const x = Number((Math.random() * 209).toFixed(2));
+        const y = Number((Math.random() * 209).toFixed(2));
 
         nodes.push({
             id,
@@ -126,4 +126,8 @@ function getLastGeneratedGraph() {
     return lastGeneratedGraph;
 }
 
-module.exports = { buildGraph, generateRandomGraph, getLastGeneratedGraph };
+export {
+    generateRandomGraph,
+    buildGraph,
+    getLastGeneratedGraph
+}

@@ -75,8 +75,9 @@ function dijkstraCalculation(graph, start, end, step) {
 
   return {
     path,
-    weight: weight[end] !== Infinity ? Number(weight[end].toFixed(2)) : null
-  };
+    weight: (weight[end] !== undefined && weight[end] !== Infinity)
+        ? Number(weight[end].toFixed(2))
+        : null  };
 }
 
 function reconstructPath(previous, start, end) {
@@ -93,4 +94,4 @@ function reconstructPath(previous, start, end) {
   return path.reverse();
 }
 
-module.exports = { dijkstraCalculation };
+export { dijkstraCalculation };
